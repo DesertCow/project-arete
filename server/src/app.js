@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const authRouter = require('./routes/auth');
 const contextRouter = require('./routes/context');
+const coachRouter = require('./routes/coach');
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api', apiLimiter);
 app.use('/api/auth', authRouter);
 app.use('/api/context', contextRouter);
+app.use('/api/coach', coachRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found' } });
