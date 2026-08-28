@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  passwordHash      String
+  name              String
+  role              Role      @default(PRIVATE)
+  corosAccessToken  String?
+  corosRefreshToken String?
+  corosOpenId       String?
+  sportProfile      Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  contextFiles      ContextFile[]
+  chatMessages      ChatMessage[]
+  workouts          GeneratedWorkout[]
+  sessions          Session[]
+}
+
+model ContextFile {
+  id        String   @id @default(uuid())
+  userId    String
+  fileType  FileType
+  content   String
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, fileType])
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String
+  role      ChatRole
+  content   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model GeneratedWorkout {
+  id             String        @id @default(uuid())
+  userId         String
+  title          String
+  description    String?
+  workoutData    Json
+  sportType      String
+  status         WorkoutStatus @default(PROPOSED)
+  scheduledFor   DateTime?
+  pushedAt       DateTime?
+  completedAt    DateTime?
+  corosWorkoutId String?
+  createdAt      DateTime      @default(now())
+  user           User          @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  PRIVATE
+  DEMO
+  ADMIN
+}
+
+enum FileType {
+  COACH_MEMORY
+  GOALS
+  TRAINING_PLAN
+  TRAINING_HISTORY
+  HEALTH_PROFILE
+}
+
+enum ChatRole {
+  USER
+  COACH
+  SYSTEM
+}
+
+enum WorkoutStatus {
+  PROPOSED
+  ACCEPTED
+  PUSHED
+  COMPLETED
+  SKIPPED
+}

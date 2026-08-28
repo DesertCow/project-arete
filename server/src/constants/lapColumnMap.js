@@ -1,0 +1,30 @@
+// COROS returns lap columns with Chinese headers; map them to English keys.
+const LAP_COLUMN_MAP = {
+  '圈数': 'lapIndex',
+  '距离': 'distance',
+  '时间': 'time',
+  '累计时间': 'totalTime',
+  '平均配速': 'avgPace',
+  '平均速度': 'avgSpeed',
+  '垂直速度': 'verticalSpeed',
+  '平均功率': 'avgPower',
+  '平均心率': 'avgHR',
+  '最大心率': 'maxHR',
+  '踏地时间': 'groundContactTime',
+  '左右平衡': 'groundBalance',
+  '平均步频': 'avgCadence',
+  '最大步频': 'maxCadence',
+  '垂直步幅比': 'strideRatio',
+  '垂直振幅': 'verticalOscillation',
+  '平均步幅': 'avgStrideLength',
+  '姿势功率': 'formPower',
+  '下肢刚度': 'legStiffness',
+  '累计上升': 'elevationGain',
+  '累计下降': 'elevationLoss',
+  '体温': 'bodyTemperature',
+  '等价配速': 'adjustedPace',
+  '地反力峰值': 'groundReactionForce',
+  '踏地角度': 'groundContactAngle',
+};
+
+module.exports = { LAP_COLUMN_MAP };
