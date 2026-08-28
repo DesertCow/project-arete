@@ -51,14 +51,29 @@ const options = {
   plugins: [htmlPlugin],
 };
 
+const SERVE_HOST = '0.0.0.0';
+const SERVE_PORT = 3000;
+
 async function run() {
   if (watch) {
     const ctx = await esbuild.context(options);
+    // Rebuild on change, and serve dist/ so the bundle is reachable on the LAN.
     await ctx.watch();
-    console.log('watching for changes…');
+    const { host, port } = await ctx.serve({
+      host: SERVE_HOST,
+      port: SERVE_PORT,
+      servedir: outdir,
+    });
+    // Ensure dist/index.html exists before the first request — the copy plugin
+    // runs onEnd, which has not fired yet if the initial build is still going.
+    copyHtml();
+    console.log(`serving ${outdir} on http://${host}:${port}`);
   } else {
     await esbuild.build(options);
   }
 }
 
-run().catch(() => process.exit(1));
+run().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
