@@ -14,7 +14,8 @@
     "db:studio": "npx prisma studio"
   },
   "prisma": {
-    "schema": "src/prisma/schema.prisma"
+    "schema": "src/prisma/schema.prisma",
+    "seed": "node src/prisma/seed.js"
   },
   "dependencies": {
     "express": "^4.18",
