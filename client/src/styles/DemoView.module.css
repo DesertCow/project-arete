@@ -1,0 +1,138 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--nav-height) - 2rem);
+  padding-top: 1rem;
+}
+
+.status {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 3rem 1rem;
+}
+
+.errorState {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.errorTitle {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.errorBody {
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.backButton {
+  display: inline-block;
+  background-color: var(--color-accent);
+  color: #ffffff;
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.backButton:hover {
+  background-color: var(--color-accent-hover);
+  color: #ffffff;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.backLink {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.backLink:hover {
+  color: var(--color-text);
+}
+
+.identity {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.name {
+  font-size: 1.3rem;
+}
+
+.sport {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+}
+
+/* Tabs are mobile-only; desktop shows both panes side by side. */
+.tabs {
+  display: none;
+  gap: 0.5rem;
+  padding: 0.75rem 0 0;
+}
+
+.tab {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+}
+
+.tabActive {
+  color: #ffffff;
+  border-color: var(--color-accent);
+  background-color: rgba(42, 125, 110, 0.15);
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  gap: 1rem;
+  min-height: 0;
+  padding-top: 1rem;
+}
+
+.chatPane {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
+.contextPane {
+  display: flex;
+  min-height: 0;
+}
+
+@media (max-width: 767px) {
+  .tabs {
+    display: flex;
+  }
+
+  .paneHidden {
+    display: none;
+  }
+
+  .paneVisible {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}

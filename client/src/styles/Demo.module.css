@@ -1,0 +1,133 @@
+.page {
+  padding: 2rem 0 1rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2.25rem;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 0.6rem;
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.status,
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-muted);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 0.9rem;
+}
+
+.icon {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.name {
+  font-size: 1.2rem;
+  margin-bottom: 0.15rem;
+}
+
+.sportTag {
+  display: inline-block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+}
+
+.tagline {
+  font-size: 0.98rem;
+  margin-bottom: 0.5rem;
+}
+
+.details {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.1rem;
+}
+
+.stats {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.35rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.stats li {
+  display: flex;
+  flex-direction: column;
+}
+
+.statLabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-faint);
+}
+
+.statValue {
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+
+.cta {
+  margin-top: auto;
+  align-self: flex-start;
+  background-color: var(--color-accent);
+  color: #ffffff;
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.cta:hover {
+  background-color: var(--color-accent-hover);
+  color: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+}
