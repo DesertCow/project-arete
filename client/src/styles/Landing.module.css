@@ -1,0 +1,181 @@
+.landing {
+  padding-top: 2rem;
+}
+
+.hero {
+  text-align: center;
+  padding: 4rem 1rem 4.5rem;
+  background: linear-gradient(180deg, #121212 0%, var(--color-bg) 100%);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.heroTitle {
+  font-size: 2.75rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.25rem;
+}
+
+.heroSubline {
+  color: var(--color-text-muted);
+  font-size: 1.15rem;
+  max-width: 620px;
+  margin: 0 auto 2rem;
+}
+
+.heroActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.primaryButton {
+  display: inline-block;
+  background-color: var(--color-accent);
+  color: #ffffff;
+  padding: 0.75rem 1.75rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.primaryButton:hover {
+  background-color: var(--color-accent-hover);
+  color: #ffffff;
+}
+
+.secondaryButton {
+  display: inline-block;
+  background-color: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border-focus);
+  padding: 0.75rem 1.75rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.secondaryButton:hover {
+  border-color: var(--color-text-muted);
+  color: var(--color-text);
+}
+
+.section {
+  padding: 3.5rem 0 0;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  margin-bottom: 1.75rem;
+  text-align: center;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.featureCard {
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1.75rem;
+}
+
+.featureTitle {
+  font-size: 1.1rem;
+  margin-bottom: 0.6rem;
+}
+
+.featureBody {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.steps {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+}
+
+.stepNumber {
+  flex: none;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.stepLabel {
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.demoSection {
+  margin-top: 3.5rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.demoBody {
+  color: var(--color-text-muted);
+  max-width: 620px;
+  margin: 0 auto 1.75rem;
+}
+
+.footer {
+  margin-top: 3.5rem;
+  padding: 2rem 0 1rem;
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+  color: var(--color-text-faint);
+  font-size: 0.9rem;
+}
+
+.footer p {
+  margin-bottom: 0.35rem;
+}
+
+.footerLink {
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 767px) {
+  .heroTitle {
+    font-size: 2rem;
+  }
+
+  .hero {
+    padding: 2.75rem 1rem 3rem;
+  }
+
+  .featureGrid,
+  .steps {
+    grid-template-columns: 1fr;
+  }
+}

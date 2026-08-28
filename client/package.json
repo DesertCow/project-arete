@@ -2,10 +2,10 @@
   "name": "arete-client",
   "version": "0.1.0",
   "private": true,
-  "description": "Project Arete frontend — AI coaching dashboard",
+  "description": "Project Arete frontend \u2014 AI coaching dashboard",
   "scripts": {
     "build": "node esbuild.config.js",
-    "dev": "node esbuild.config.js --watch",
+    "dev": "node dev-server.js",
     "clean": "rm -rf dist"
   },
   "dependencies": {

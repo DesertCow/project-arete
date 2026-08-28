@@ -10,7 +10,26 @@ const coachRouter = require('./routes/coach');
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
+// Browsers send an Origin per host, so localhost and the LAN address are
+// distinct origins even though they reach the same dev server.
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:3000',
+  'http://localhost:3000',
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // No Origin header: curl, server-to-server, same-origin navigation.
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: '1mb' }));
 
 // Mounted ahead of the limiter so uptime probes are never throttled.
