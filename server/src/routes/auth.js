@@ -7,6 +7,7 @@ const { authenticate } = require('../middleware/auth');
 const { authLimiter } = require('../middleware/rateLimiter');
 const { createSession } = require('../services/tokenService');
 const { registerSchema, loginSchema } = require('../schemas/auth');
+const { initializeContextFiles } = require('../services/contextManager');
 
 const router = express.Router();
 
@@ -44,6 +45,8 @@ router.post('/register', authLimiter, validate(registerSchema), async (req, res,
     const user = await prisma.user.create({
       data: { email, passwordHash, name, role: 'PRIVATE' },
     });
+
+    await initializeContextFiles(user.id);
 
     const token = await createSession(user.id);
 
