@@ -1,0 +1,87 @@
+.userRow,
+.coachRow {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+}
+
+.userRow {
+  align-items: flex-end;
+}
+
+.coachRow {
+  align-items: flex-start;
+}
+
+.userBubble,
+.coachBubble {
+  max-width: 78%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.userBubble {
+  background-color: var(--color-accent);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.userText {
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.coachBubble {
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-bottom-left-radius: 4px;
+}
+
+.timestamp {
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--color-text-faint);
+}
+
+.cursor {
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background-color: var(--color-text-muted);
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.systemRow {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.systemText {
+  max-width: 80%;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-error);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+}
+
+@media (max-width: 767px) {
+  .userBubble,
+  .coachBubble {
+    max-width: 90%;
+  }
+}
