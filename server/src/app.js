@@ -6,6 +6,7 @@ const { apiLimiter } = require('./middleware/rateLimiter');
 const authRouter = require('./routes/auth');
 const contextRouter = require('./routes/context');
 const coachRouter = require('./routes/coach');
+const demoRouter = require('./routes/demo');
 
 const app = express();
 
@@ -36,6 +37,10 @@ app.use(express.json({ limit: '1mb' }));
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Public demo: mounted ahead of apiLimiter because it enforces its own
+// per-IP cooldown and session cap.
+app.use('/api/demo', demoRouter);
 
 app.use('/api', apiLimiter);
 app.use('/api/auth', authRouter);
