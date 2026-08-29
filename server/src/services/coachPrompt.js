@@ -1,4 +1,4 @@
-function buildCoachSystemPrompt(contextFormatted, mode = 'conversation') {
+function buildCoachSystemPrompt(contextFormatted, mode = 'conversation', weatherText = null) {
   const basePrompt = `You are Arete, an elite AI endurance and multi-sport coach. You combine deep physiological knowledge with genuine empathy to guide athletes toward their goals.
 
 ## Your Coaching Philosophy
@@ -44,9 +44,21 @@ The following is everything you know about this athlete. Use it to personalize e
 ${contextFormatted}
 `;
 
+  // Weather is optional; callers that omit it keep the previous prompt exactly.
+  let prompt = basePrompt;
+
+  if (weatherText) {
+    prompt +=
+      `\n\n${weatherText}\n` +
+      '\nUse this weather data when recommending training times, clothing, hydration, or ' +
+      'indoor/outdoor decisions. If the forecast shows extreme heat (>95°F), heavy rain, or ' +
+      'dangerous conditions, proactively address it. Do not repeat the raw forecast back to ' +
+      'the athlete — interpret it into actionable coaching.\n';
+  }
+
   if (mode === 'checkin') {
     return (
-      basePrompt +
+      prompt +
       `\n\n## Current Mode: Life Check-in
 You are conducting a structured life check-in. Walk through these areas one at a time, waiting for the athlete's response before moving to the next:
 
@@ -63,7 +75,7 @@ Start by greeting the athlete by name and asking about their physical state.`
     );
   }
 
-  return basePrompt;
+  return prompt;
 }
 
 module.exports = { buildCoachSystemPrompt };

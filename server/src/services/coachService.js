@@ -4,6 +4,7 @@ const prisma = require('../lib/prisma');
 const { loadContextForPrompt, updateContextFile } = require('./contextManager');
 const { getCoachResponse, streamCoachResponse } = require('./ai');
 const { buildCoachSystemPrompt } = require('./coachPrompt');
+const { getWeatherForPrompt } = require('./weatherService');
 
 const logger = pino({ name: 'coachService' });
 
@@ -109,9 +110,24 @@ async function saveChatMessage(userId, role, content, metadata = null) {
   });
 }
 
+// Weather is best-effort: getWeatherForPrompt swallows its own failures, and
+// this adds a second guard so a lookup can never break a coaching turn.
+async function loadWeatherText(userId) {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const location = user?.sportProfile?.location;
+    if (!location?.lat || !location?.lon) return null;
+    return await getWeatherForPrompt(location.lat, location.lon, location.city);
+  } catch (err) {
+    logger.warn({ err, userId }, 'Weather lookup failed — continuing without it');
+    return null;
+  }
+}
+
 async function handleCoachMessage(userId, message, mode = 'conversation') {
   const context = await loadContextForPrompt(userId);
-  const systemPrompt = buildCoachSystemPrompt(context.formatted, mode);
+  const weatherText = await loadWeatherText(userId);
+  const systemPrompt = buildCoachSystemPrompt(context.formatted, mode, weatherText);
   const messages = await buildMessages(userId, message);
 
   await saveChatMessage(userId, 'USER', message);
@@ -163,7 +179,8 @@ function createTagSafeEmitter(onChunk) {
 
 async function handleCoachMessageStream(userId, message, mode, onChunk) {
   const context = await loadContextForPrompt(userId);
-  const systemPrompt = buildCoachSystemPrompt(context.formatted, mode);
+  const weatherText = await loadWeatherText(userId);
+  const systemPrompt = buildCoachSystemPrompt(context.formatted, mode, weatherText);
   const messages = await buildMessages(userId, message);
 
   await saveChatMessage(userId, 'USER', message);

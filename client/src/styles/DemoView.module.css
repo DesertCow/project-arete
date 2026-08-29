@@ -75,9 +75,10 @@
   color: var(--color-accent);
 }
 
-/* Tabs are mobile-only; desktop shows both panes side by side. */
+/* Chat and Context sit side by side on desktop; Dashboard takes the full width,
+   so the tab strip is always shown. */
 .tabs {
-  display: none;
+  display: flex;
   gap: 0.5rem;
   padding: 0.75rem 0 0;
 }
@@ -117,9 +118,6 @@
 }
 
 @media (max-width: 767px) {
-  .tabs {
-    display: flex;
-  }
 
   .paneHidden {
     display: none;
@@ -134,5 +132,22 @@
   .header {
     flex-wrap: wrap;
     gap: 0.5rem;
+  }
+}
+
+.dashboardPane {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-top: 1rem;
+}
+
+.tab {
+  flex: 0 1 160px;
+}
+
+@media (max-width: 767px) {
+  .tab {
+    flex: 1;
   }
 }

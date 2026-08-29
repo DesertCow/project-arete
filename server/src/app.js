@@ -7,6 +7,8 @@ const authRouter = require('./routes/auth');
 const contextRouter = require('./routes/context');
 const coachRouter = require('./routes/coach');
 const demoRouter = require('./routes/demo');
+const settingsRouter = require('./routes/settings');
+const corosRouter = require('./routes/coros');
 
 const app = express();
 
@@ -46,6 +48,8 @@ app.use('/api', apiLimiter);
 app.use('/api/auth', authRouter);
 app.use('/api/context', contextRouter);
 app.use('/api/coach', coachRouter);
+app.use('/api/settings', settingsRouter);
+app.use('/api/coros', corosRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found' } });

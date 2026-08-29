@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../utils/api.js';
 import DemoChat from '../components/DemoChat.js';
 import DemoContextPanel from '../components/DemoContextPanel.js';
+import DashboardView from '../components/DashboardView.js';
 import styles from '../styles/DemoView.module.css';
 
 const SPORT_LABELS = {
@@ -18,6 +19,8 @@ export default function DemoView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mobileTab, setMobileTab] = useState('chat');
+  const [dashboard, setDashboard] = useState(null);
+  const [dashboardError, setDashboardError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,6 +41,23 @@ export default function DemoView() {
       cancelled = true;
     };
   }, [id]);
+
+  // Fetched only when the Dashboard tab is first opened.
+  useEffect(() => {
+    if (mobileTab !== 'dashboard' || dashboard || dashboardError) return undefined;
+    let cancelled = false;
+    api
+      .get(`/demo/${id}/dashboard`)
+      .then((res) => {
+        if (!cancelled) setDashboard(res.data);
+      })
+      .catch(() => {
+        if (!cancelled) setDashboardError('Could not load this athlete\'s data.');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mobileTab, id, dashboard, dashboardError]);
 
   if (loading) {
     return <p className={styles.status}>Loading athlete…</p>;
@@ -82,6 +102,15 @@ export default function DemoView() {
         <button
           type="button"
           role="tab"
+          aria-selected={mobileTab === 'dashboard'}
+          className={`${styles.tab} ${mobileTab === 'dashboard' ? styles.tabActive : ''}`}
+          onClick={() => setMobileTab('dashboard')}
+        >
+          Dashboard
+        </button>
+        <button
+          type="button"
+          role="tab"
           aria-selected={mobileTab === 'context'}
           className={`${styles.tab} ${mobileTab === 'context' ? styles.tabActive : ''}`}
           onClick={() => setMobileTab('context')}
@@ -90,18 +119,26 @@ export default function DemoView() {
         </button>
       </div>
 
-      <div className={styles.body}>
-        <div
-          className={`${styles.chatPane} ${mobileTab === 'chat' ? styles.paneVisible : styles.paneHidden}`}
-        >
-          <DemoChat userId={data.user.id} />
+      {mobileTab === 'dashboard' ? (
+        <div className={styles.dashboardPane}>
+          {dashboardError && <p className={styles.status}>{dashboardError}</p>}
+          {!dashboardError && !dashboard && <p className={styles.status}>Loading data…</p>}
+          {dashboard && <DashboardView data={dashboard} />}
         </div>
-        <div
-          className={`${styles.contextPane} ${mobileTab === 'context' ? styles.paneVisible : styles.paneHidden}`}
-        >
-          <DemoContextPanel contextFiles={data.contextFiles} />
+      ) : (
+        <div className={styles.body}>
+          <div
+            className={`${styles.chatPane} ${mobileTab === 'chat' ? styles.paneVisible : styles.paneHidden}`}
+          >
+            <DemoChat userId={data.user.id} />
+          </div>
+          <div
+            className={`${styles.contextPane} ${mobileTab === 'context' ? styles.paneVisible : styles.paneHidden}`}
+          >
+            <DemoContextPanel contextFiles={data.contextFiles} />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
