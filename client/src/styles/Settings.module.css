@@ -95,3 +95,19 @@
     flex-direction: column;
   }
 }
+
+.select {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  width: 100%;
+}
+
+.select:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}

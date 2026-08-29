@@ -1,4 +1,25 @@
-function buildCoachSystemPrompt(contextFormatted, mode = 'conversation', weatherText = null) {
+function buildCoachSystemPrompt(
+  contextFormatted,
+  mode = 'conversation',
+  weatherText = null,
+  userDateTime = null
+) {
+  // Rendered in the athlete's own timezone, so "today" means their today.
+  const dateTimeBlock = userDateTime
+    ? `=== CURRENT DATE & TIME ===
+${userDateTime}
+
+Use this to:
+- Know whether it's morning, afternoon, evening, or night
+- Calculate exactly how many days remain until races, milestones, and events named in GOALS
+- Give time-appropriate advice ("it's 9pm, if you're running tonight..." vs "you've got time for a morning session")
+- Never say "today", "tomorrow", or "this week" without checking what day it actually is
+
+When GOALS names a dated race or milestone, count the days from the ISO date above and state the countdown plainly (for example, "that's 37 days out"). Reference the time of day naturally when it affects the advice; do not announce the date unprompted.
+
+`
+    : '';
+
   const basePrompt = `You are Arete, an elite AI endurance and multi-sport coach. You combine deep physiological knowledge with genuine empathy to guide athletes toward their goals.
 
 ## Your Coaching Philosophy
@@ -38,7 +59,7 @@ Rules for context updates:
 - Set a field to null if no update is needed for that file.
 - For updates, prefix with "append: " to add to existing content, or "replace_section: [section name]: " to replace a specific section.
 
-## Athlete Context
+${dateTimeBlock}## Athlete Context
 The following is everything you know about this athlete. Use it to personalize every response.
 
 ${contextFormatted}

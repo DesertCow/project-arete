@@ -21,6 +21,12 @@ router.patch('/profile', validate(updateProfileSchema), async (req, res, next) =
     const existing = req.user.sportProfile || {};
     const sportProfile = { ...existing, ...req.validated };
 
+    // location merges too — a PATCH that omits timezone must not erase it, or
+    // the coach silently reverts to the default zone.
+    if (req.validated.location) {
+      sportProfile.location = { ...(existing.location || {}), ...req.validated.location };
+    }
+
     const user = await prisma.user.update({
       where: { id: req.user.id },
       data: { sportProfile },

@@ -7,6 +7,7 @@ const { loadContextForPrompt } = require('../services/contextManager');
 const { buildCoachSystemPrompt } = require('../services/coachPrompt');
 const { getCoachResponse } = require('../services/ai');
 const { getWeatherForPrompt } = require('../services/weatherService');
+const { getUserDateTime } = require('../utils/userTime');
 const { parseContextUpdate } = require('../services/coachService');
 const { getDashboardData } = require('../services/dashboardService');
 
@@ -158,7 +159,14 @@ router.post(
           ? await getWeatherForPrompt(location.lat, location.lon, location.city)
           : null;
 
-      const systemPrompt = buildCoachSystemPrompt(context.formatted, 'conversation', weatherText);
+      const userDateTime = getUserDateTime(req.demoUser);
+
+      const systemPrompt = buildCoachSystemPrompt(
+        context.formatted,
+        'conversation',
+        weatherText,
+        userDateTime
+      );
 
       const messages = [...history, { role: 'user', content: message }];
 
