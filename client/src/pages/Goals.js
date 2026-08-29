@@ -2,9 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api.js';
 import { useAuth } from '../hooks/useAuth.js';
 import MarkdownEditor from '../components/MarkdownEditor.js';
+import { SkeletonLines } from '../components/Skeleton.js';
+import { readApiError } from '../utils/apiError.js';
 import styles from '../styles/Goals.module.css';
+import usePageTitle from '../hooks/usePageTitle.js';
 
 export default function Goals() {
+  usePageTitle('Goals');
   const { user } = useAuth();
   const [content, setContent] = useState('');
   const [savedContent, setSavedContent] = useState('');
@@ -46,7 +50,7 @@ export default function Goals() {
       setVersion(res.data.contextFile.version);
       setLastSaved(new Date().toISOString());
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Could not save your goals.');
+      setError(readApiError(err, 'Could not save your goals.'));
     } finally {
       setSaving(false);
     }
@@ -66,7 +70,10 @@ export default function Goals() {
       </header>
 
       {loading ? (
-        <p className={styles.status}>Loading goals…</p>
+        <div className={styles.status} aria-busy="true" aria-label="Loading">
+          <div className="skeleton skeleton-heading" />
+          <SkeletonLines count={6} />
+        </div>
       ) : (
         <>
           <MarkdownEditor

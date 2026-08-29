@@ -4,6 +4,8 @@ import api from '../utils/api.js';
 import DemoChat from '../components/DemoChat.js';
 import DemoContextPanel from '../components/DemoContextPanel.js';
 import DashboardView from '../components/DashboardView.js';
+import { SkeletonLines } from '../components/Skeleton.js';
+import usePageTitle from '../hooks/usePageTitle.js';
 import styles from '../styles/DemoView.module.css';
 
 const SPORT_LABELS = {
@@ -21,6 +23,8 @@ export default function DemoView() {
   const [mobileTab, setMobileTab] = useState('chat');
   const [dashboard, setDashboard] = useState(null);
   const [dashboardError, setDashboardError] = useState(null);
+
+  usePageTitle(data?.user?.name || 'Demo Athlete');
 
   useEffect(() => {
     let cancelled = false;
@@ -60,7 +64,13 @@ export default function DemoView() {
   }, [mobileTab, id, dashboard, dashboardError]);
 
   if (loading) {
-    return <p className={styles.status}>Loading athlete…</p>;
+    return (
+      <div className={styles.page} aria-busy="true" aria-label="Loading athlete">
+        <div className="skeleton skeleton-heading" style={{ marginTop: '1.5rem' }} />
+        <div className="skeleton skeleton-chart" />
+        <SkeletonLines count={4} />
+      </div>
+    );
   }
 
   if (error || !data) {
@@ -122,7 +132,12 @@ export default function DemoView() {
       {mobileTab === 'dashboard' ? (
         <div className={styles.dashboardPane}>
           {dashboardError && <p className={styles.status}>{dashboardError}</p>}
-          {!dashboardError && !dashboard && <p className={styles.status}>Loading data…</p>}
+          {!dashboardError && !dashboard && (
+            <div aria-busy="true" aria-label="Loading dashboard">
+              <div className="skeleton skeleton-card" />
+              <div className="skeleton skeleton-chart" />
+            </div>
+          )}
           {dashboard && <DashboardView data={dashboard} />}
         </div>
       ) : (

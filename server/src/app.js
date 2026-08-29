@@ -1,3 +1,5 @@
+const path = require('path');
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -11,6 +13,12 @@ const settingsRouter = require('./routes/settings');
 const corosRouter = require('./routes/coros');
 
 const app = express();
+
+// Railway terminates TLS at a proxy; without this req.ip is the proxy's address
+// and every visitor shares one rate-limit bucket.
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 
 app.use(helmet());
 // Browsers send an Origin per host, so localhost and the LAN address are
@@ -51,14 +59,29 @@ app.use('/api/coach', coachRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/coros', corosRouter);
 
-app.use((req, res) => {
-  res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found' } });
+// In production the API server also serves the built client.
+if (process.env.NODE_ENV === 'production') {
+  const clientDist = path.join(__dirname, '../../client/dist');
+  app.use(express.static(clientDist));
+
+  // SPA fallback: any non-API, non-WS path returns index.html so client-side
+  // routes survive a hard refresh.
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/') || req.path.startsWith('/ws/')) {
+      return next();
+    }
+    return res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
+
+// Scoped to /api so it cannot swallow client-side routes in production.
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: { code: 'NOT_FOUND', message: 'API route not found' } });
 });
 
 // Keeps unexpected failures inside the { error: { code, message } } contract.
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  req.log?.error?.(err);
   console.error(err);
   res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Something went wrong' } });
 });

@@ -12,10 +12,13 @@ import Goals from './pages/Goals.js';
 import Health from './pages/Health.js';
 import History from './pages/History.js';
 import Settings from './pages/Settings.js';
+import NotFound from './pages/NotFound.js';
+import ErrorBoundary from './components/ErrorBoundary.js';
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
       <AuthProvider>
         <Layout>
           <Routes>
@@ -71,9 +74,11 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
       </AuthProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }

@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
 import api from '../utils/api.js';
 import { useAuth } from '../hooks/useAuth.js';
+import { readApiError } from '../utils/apiError.js';
 import styles from '../styles/Settings.module.css';
+import usePageTitle from '../hooks/usePageTitle.js';
 
 export default function Settings() {
+  usePageTitle('Settings');
+
   const { user } = useAuth();
   const [city, setCity] = useState('');
   const [lat, setLat] = useState('');
@@ -56,9 +60,7 @@ export default function Settings() {
       });
       setStatus('Location saved. Your coach will use this forecast.');
     } catch (err) {
-      const apiError = err.response?.data?.error;
-      const detail = apiError?.details && Object.values(apiError.details)[0]?.[0];
-      setError(detail || apiError?.message || 'Could not save your location.');
+      setError(readApiError(err, 'Could not save your location.'));
     } finally {
       setSaving(false);
     }
