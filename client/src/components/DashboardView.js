@@ -42,8 +42,24 @@ export default function DashboardView({ data, goalsFooter = null }) {
       (data.goals.length > GOALS_PREVIEW_LENGTH ? '…' : '')
     : null;
 
+  // Every COROS series empty means the watch isn't connected yet — say so once
+  // rather than showing six individually-empty charts.
+  const hasCorosData =
+    (data.weeklyTraining?.length || 0) +
+      (data.trainingLoad?.length || 0) +
+      (data.hrvTrend?.length || 0) +
+      (data.sleepQuality?.length || 0) +
+      (data.restingHR?.length || 0) >
+    0;
+
   return (
     <>
+      {!hasCorosData && (
+        <p className={styles.connectNotice}>
+          Connect your COROS watch to see your training data.
+        </p>
+      )}
+
       <div className={styles.statRow}>
         <StatCard
           title="Recovery"

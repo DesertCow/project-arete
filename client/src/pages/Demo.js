@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api.js';
+import { SkeletonCards } from '../components/Skeleton.js';
+import { readApiError } from '../utils/apiError.js';
 import styles from '../styles/Demo.module.css';
+import usePageTitle from '../hooks/usePageTitle.js';
 
 const ATHLETE_STORIES = {
   'Maria Chen': {
@@ -35,6 +38,8 @@ const ATHLETE_STORIES = {
 };
 
 export default function Demo() {
+  usePageTitle('Demo Athletes');
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,8 +51,8 @@ export default function Demo() {
       .then((res) => {
         if (!cancelled) setUsers(res.data.users);
       })
-      .catch(() => {
-        if (!cancelled) setError('Could not load the demo athletes.');
+      .catch((err) => {
+        if (!cancelled) setError(readApiError(err, 'Could not load the demo athletes.'));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -67,7 +72,11 @@ export default function Demo() {
         </p>
       </header>
 
-      {loading && <p className={styles.status}>Loading athletes…</p>}
+      {loading && (
+        <div aria-busy="true" aria-label="Loading athletes">
+          <SkeletonCards count={4} className={styles.grid} />
+        </div>
+      )}
       {error && <p className={styles.error}>{error}</p>}
 
       {!loading && !error && (

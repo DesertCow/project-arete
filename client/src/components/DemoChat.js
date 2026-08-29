@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api.js';
 import ChatMessage from './ChatMessage.js';
+import { readApiError } from '../utils/apiError.js';
 import styles from '../styles/DemoChat.module.css';
 
 const MAX_DEMO_MESSAGES = 10;
@@ -82,7 +83,7 @@ export default function DemoChat({ userId }) {
         setLimitReached(true);
         setRemaining(0);
       } else {
-        setError(apiError?.message || 'The coach could not respond. Try again.');
+        setError(readApiError(err, 'The coach could not respond. Try again.'));
       }
     } finally {
       setLoading(false);

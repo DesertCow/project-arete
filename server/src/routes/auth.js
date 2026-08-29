@@ -13,6 +13,19 @@ const router = express.Router();
 
 const SALT_ROUNDS = Number(process.env.BCRYPT_SALT_ROUNDS) || 12;
 
+// Registration is gated to one email domain while the app is invite-only.
+// Set ALLOWED_EMAIL_DOMAIN='*' to open registration to everyone.
+const ALLOWED_EMAIL_DOMAIN = process.env.ALLOWED_EMAIL_DOMAIN ?? 'coros.com';
+
+function isEmailDomainAllowed(email) {
+  const allowed = ALLOWED_EMAIL_DOMAIN.trim();
+  if (allowed === '*' || allowed === '') return true;
+
+  // Compare the full domain, not a suffix — "evil-coros.com" must not pass.
+  const domain = String(email).split('@').pop().toLowerCase();
+  return domain === allowed.toLowerCase();
+}
+
 // Login failures are deliberately indistinguishable: unknown email, wrong
 // password, and demo account all produce this exact response.
 const invalidCredentials = {
@@ -31,6 +44,15 @@ function publicUser(user) {
 
 router.post('/register', authLimiter, validate(registerSchema), async (req, res, next) => {
   const { email, password, name } = req.validated;
+
+  if (!isEmailDomainAllowed(email)) {
+    return res.status(403).json({
+      error: {
+        code: 'REGISTRATION_RESTRICTED',
+        message: 'Registration is currently limited to COROS team members.',
+      },
+    });
+  }
 
   try {
     const existing = await prisma.user.findUnique({ where: { email } });

@@ -2,9 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api.js';
 import DashboardView from '../components/DashboardView.js';
+import { SkeletonCards } from '../components/Skeleton.js';
+import { readApiError } from '../utils/apiError.js';
 import styles from '../styles/Dashboard.module.css';
+import usePageTitle from '../hooks/usePageTitle.js';
 
 export default function Dashboard() {
+  usePageTitle('Dashboard');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,8 +19,8 @@ export default function Dashboard() {
     try {
       const res = await api.get('/coros/dashboard');
       setData(res.data);
-    } catch {
-      setError('Could not load your dashboard.');
+    } catch (err) {
+      setError(readApiError(err, 'Could not load your dashboard.'));
     } finally {
       setLoading(false);
     }
@@ -35,7 +39,16 @@ export default function Dashboard() {
         </button>
       </header>
 
-      {loading && !data && <p className={styles.status}>Loading your data…</p>}
+      {loading && !data && (
+        <div aria-busy="true" aria-label="Loading dashboard">
+          <SkeletonCards count={4} className={styles.statRow} />
+          <div className="skeleton skeleton-chart" />
+          <div className={styles.chartGrid}>
+            <div className="skeleton skeleton-chart" />
+            <div className="skeleton skeleton-chart" />
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className={styles.status}>

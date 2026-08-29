@@ -1,27 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
+import { readApiError } from '../utils/apiError.js';
 import styles from '../styles/Login.module.css';
-
-// The API returns { error: { code, message, details? } }. Prefer field-level
-// validation detail when present, since "Invalid request body" alone is useless.
-function readApiError(err) {
-  const apiError = err.response?.data?.error;
-  if (!apiError) {
-    return 'Something went wrong. Please try again.';
-  }
-  const fieldErrors = apiError.details;
-  if (fieldErrors) {
-    const firstField = Object.keys(fieldErrors)[0];
-    const firstMessage = fieldErrors[firstField]?.[0];
-    if (firstMessage) {
-      return `${firstField}: ${firstMessage}`;
-    }
-  }
-  return apiError.message || 'Something went wrong. Please try again.';
-}
+import usePageTitle from '../hooks/usePageTitle.js';
 
 export default function Login() {
+  usePageTitle('Log In');
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -45,7 +30,15 @@ export default function Login() {
       }
       navigate('/dashboard');
     } catch (err) {
-      setError(readApiError(err));
+      // Surface the domain restriction as its own explanatory message rather
+      // than a bare permission error.
+      if (err.response?.data?.error?.code === 'REGISTRATION_RESTRICTED') {
+        setError(
+          `${err.response.data.error.message} If you have a COROS email address, use it to sign up.`
+        );
+      } else {
+        setError(readApiError(err));
+      }
     } finally {
       setSubmitting(false);
     }

@@ -2,12 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api.js';
 import { useAuth } from '../hooks/useAuth.js';
 import MarkdownEditor from '../components/MarkdownEditor.js';
+import { SkeletonLines } from '../components/Skeleton.js';
+import { readApiError } from '../utils/apiError.js';
 import { appendInjury, appendWeight, appendIllness } from '../utils/contextFile.js';
 import styles from '../styles/Health.module.css';
+import usePageTitle from '../hooks/usePageTitle.js';
 
 const EMPTY_INJURY = { bodyPart: '', description: '', severity: 'mild' };
 
 export default function Health() {
+  usePageTitle('Health Profile');
   const { user } = useAuth();
   const [content, setContent] = useState('');
   const [savedContent, setSavedContent] = useState('');
@@ -59,7 +63,7 @@ export default function Health() {
         setVersion(res.data.contextFile.version);
         setLastSaved(new Date().toISOString());
       } catch (err) {
-        setError(err.response?.data?.error?.message || 'Could not save your health profile.');
+        setError(readApiError(err, 'Could not save your health profile.'));
       } finally {
         setSaving(false);
       }
@@ -115,7 +119,10 @@ export default function Health() {
       </header>
 
       {loading ? (
-        <p className={styles.status}>Loading health profile…</p>
+        <div className={styles.status} aria-busy="true" aria-label="Loading">
+          <div className="skeleton skeleton-heading" />
+          <SkeletonLines count={6} />
+        </div>
       ) : (
         <>
           <div className={styles.quickLog}>

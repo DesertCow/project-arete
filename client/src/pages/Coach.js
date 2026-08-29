@@ -4,7 +4,10 @@ import { useAuth } from '../hooks/useAuth.js';
 import useCoachSocket from '../hooks/useCoachSocket.js';
 import ChatMessage from '../components/ChatMessage.js';
 import ContextViewer from '../components/ContextViewer.js';
+import { SkeletonLines } from '../components/Skeleton.js';
+import { readApiError } from '../utils/apiError.js';
 import styles from '../styles/Coach.module.css';
+import usePageTitle from '../hooks/usePageTitle.js';
 
 const CONNECTION_LABELS = {
   connected: 'Connected',
@@ -16,6 +19,7 @@ const CONNECTION_LABELS = {
 const SCROLL_STICK_THRESHOLD = 120;
 
 export default function Coach() {
+  usePageTitle('Coach');
   const { user } = useAuth();
   const {
     messages,
@@ -43,8 +47,8 @@ export default function Coach() {
     try {
       const res = await api.get(`/coach/history/${user.id}`);
       setInitialMessages(res.data.messages);
-    } catch {
-      setHistoryError('Could not load your chat history.');
+    } catch (err) {
+      setHistoryError(readApiError(err, 'Could not load your chat history.'));
     } finally {
       setHistoryLoading(false);
     }
@@ -138,7 +142,13 @@ export default function Coach() {
       <div className={styles.body}>
         <section className={styles.chatColumn}>
           <div className={styles.messages} ref={scrollRef} onScroll={handleScroll}>
-            {historyLoading && <p className={styles.notice}>Loading conversation…</p>}
+            {historyLoading && (
+              <div className={styles.skeletonWrap} aria-busy="true" aria-label="Loading conversation">
+                <SkeletonLines count={2} />
+                <div className="skeleton skeleton-text" style={{ width: '80%', marginTop: '1.5rem' }} />
+                <SkeletonLines count={3} />
+              </div>
+            )}
 
             {historyError && (
               <div className={styles.notice}>

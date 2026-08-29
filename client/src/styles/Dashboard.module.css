@@ -152,3 +152,14 @@
     grid-template-columns: 1fr;
   }
 }
+
+.connectNotice {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 0.85rem 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
