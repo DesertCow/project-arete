@@ -3,6 +3,20 @@ import api from '../utils/api.js';
 import { useAuth } from '../hooks/useAuth.js';
 import { readApiError } from '../utils/apiError.js';
 import styles from '../styles/Settings.module.css';
+
+const DEFAULT_TIMEZONE = 'America/New_York';
+
+// Common US zones cover the athletes we have; any other IANA name can be typed
+// in and the server validates it.
+const TIMEZONES = [
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Phoenix',
+  'America/Los_Angeles',
+  'America/Anchorage',
+  'Pacific/Honolulu',
+];
 import usePageTitle from '../hooks/usePageTitle.js';
 
 export default function Settings() {
@@ -12,6 +26,7 @@ export default function Settings() {
   const [city, setCity] = useState('');
   const [lat, setLat] = useState('');
   const [lon, setLon] = useState('');
+  const [timezone, setTimezone] = useState(DEFAULT_TIMEZONE);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState(null);
@@ -28,6 +43,7 @@ export default function Settings() {
           setCity(location.city ?? '');
           setLat(location.lat != null ? String(location.lat) : '');
           setLon(location.lon != null ? String(location.lon) : '');
+          if (location.timezone) setTimezone(location.timezone);
         }
       })
       .catch(() => {
@@ -56,7 +72,7 @@ export default function Settings() {
     setSaving(true);
     try {
       await api.patch('/settings/profile', {
-        location: { city: city.trim(), lat: latNum, lon: lonNum },
+        location: { city: city.trim(), lat: latNum, lon: lonNum, timezone },
       });
       setStatus('Location saved. Your coach will use this forecast.');
     } catch (err) {
@@ -119,6 +135,30 @@ export default function Settings() {
                 />
               </label>
             </div>
+
+            <label className={styles.field}>
+              <span className={styles.fieldLabel}>Timezone</span>
+              <select
+                className={styles.select}
+                value={TIMEZONES.includes(timezone) ? timezone : 'custom'}
+                onChange={(e) => {
+                  if (e.target.value !== 'custom') setTimezone(e.target.value);
+                }}
+              >
+                {TIMEZONES.map((tz) => (
+                  <option key={tz} value={tz}>
+                    {tz.replace('America/', '').replace('Pacific/', '').replace('_', ' ')}
+                  </option>
+                ))}
+                {!TIMEZONES.includes(timezone) && (
+                  <option value="custom">{timezone} (custom)</option>
+                )}
+              </select>
+            </label>
+
+            <p className={styles.helper}>
+              Your coach uses this to know what day and time it is where you are.
+            </p>
 
             <p className={styles.helper}>
               Need coordinates? Find your spot on{' '}

@@ -5,6 +5,7 @@ const { loadContextForPrompt, updateContextFile } = require('./contextManager');
 const { getCoachResponse, streamCoachResponse } = require('./ai');
 const { buildCoachSystemPrompt } = require('./coachPrompt');
 const { getWeatherForPrompt } = require('./weatherService');
+const { getUserDateTime } = require('../utils/userTime');
 
 const logger = pino({ name: 'coachService' });
 
@@ -110,24 +111,36 @@ async function saveChatMessage(userId, role, content, metadata = null) {
   });
 }
 
-// Weather is best-effort: getWeatherForPrompt swallows its own failures, and
-// this adds a second guard so a lookup can never break a coaching turn.
-async function loadWeatherText(userId) {
+// One user read serves both the forecast lookup and the local clock.
+// Weather is best-effort; the date/time always resolves (falling back to the
+// default zone), so the coach never loses track of what day it is.
+async function loadEnvironment(userId) {
+  let user = null;
   try {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    user = await prisma.user.findUnique({ where: { id: userId } });
+  } catch (err) {
+    logger.warn({ err, userId }, 'User lookup failed — continuing without environment');
+  }
+
+  const userDateTime = getUserDateTime(user);
+
+  let weatherText = null;
+  try {
     const location = user?.sportProfile?.location;
-    if (!location?.lat || !location?.lon) return null;
-    return await getWeatherForPrompt(location.lat, location.lon, location.city);
+    if (location?.lat && location?.lon) {
+      weatherText = await getWeatherForPrompt(location.lat, location.lon, location.city);
+    }
   } catch (err) {
     logger.warn({ err, userId }, 'Weather lookup failed — continuing without it');
-    return null;
   }
+
+  return { weatherText, userDateTime };
 }
 
 async function handleCoachMessage(userId, message, mode = 'conversation') {
   const context = await loadContextForPrompt(userId);
-  const weatherText = await loadWeatherText(userId);
-  const systemPrompt = buildCoachSystemPrompt(context.formatted, mode, weatherText);
+  const { weatherText, userDateTime } = await loadEnvironment(userId);
+  const systemPrompt = buildCoachSystemPrompt(context.formatted, mode, weatherText, userDateTime);
   const messages = await buildMessages(userId, message);
 
   await saveChatMessage(userId, 'USER', message);
@@ -179,8 +192,8 @@ function createTagSafeEmitter(onChunk) {
 
 async function handleCoachMessageStream(userId, message, mode, onChunk) {
   const context = await loadContextForPrompt(userId);
-  const weatherText = await loadWeatherText(userId);
-  const systemPrompt = buildCoachSystemPrompt(context.formatted, mode, weatherText);
+  const { weatherText, userDateTime } = await loadEnvironment(userId);
+  const systemPrompt = buildCoachSystemPrompt(context.formatted, mode, weatherText, userDateTime);
   const messages = await buildMessages(userId, message);
 
   await saveChatMessage(userId, 'USER', message);
