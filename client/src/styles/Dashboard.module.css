@@ -1,0 +1,154 @@
+.page {
+  padding: 1.5rem 0 2rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.title {
+  font-size: 1.5rem;
+}
+
+.refresh {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  padding: 0.4rem 1rem;
+}
+
+.refresh:hover:not(:disabled) {
+  color: var(--color-text);
+  border-color: var(--color-border-focus);
+}
+
+.status {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.error {
+  color: var(--color-error);
+  margin-bottom: 1rem;
+}
+
+.retry {
+  background-color: var(--color-accent);
+  color: #ffffff;
+  font-size: 0.85rem;
+  padding: 0.45rem 1.2rem;
+}
+
+.statRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.fullRow {
+  margin-bottom: 1rem;
+}
+
+.chartGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel {
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  min-width: 0;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.panelTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.panelBody {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.link {
+  font-size: 0.82rem;
+}
+
+.empty {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  padding: 0.5rem 0 1rem;
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.itemTitle {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.itemMeta {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-text-faint);
+  text-transform: capitalize;
+}
+
+.itemDate {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .statRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .chartGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .statRow {
+    grid-template-columns: 1fr;
+  }
+}

@@ -8,6 +8,7 @@ const { buildCoachSystemPrompt } = require('../services/coachPrompt');
 const { getCoachResponse } = require('../services/ai');
 const { getWeatherForPrompt } = require('../services/weatherService');
 const { parseContextUpdate } = require('../services/coachService');
+const { getDashboardData } = require('../services/dashboardService');
 
 const router = express.Router();
 
@@ -105,6 +106,21 @@ router.get('/:userId', async (req, res, next) => {
       user: { id: user.id, name: user.name, sportProfile: user.sportProfile },
       contextFiles,
     });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.get('/:userId/dashboard', async (req, res, next) => {
+  try {
+    const user = await findDemoUser(req.params.userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ error: { code: 'NOT_FOUND', message: 'Demo athlete not found' } });
+    }
+    const data = await getDashboardData(user.id);
+    return res.json(data);
   } catch (err) {
     return next(err);
   }
