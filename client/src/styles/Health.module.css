@@ -1,0 +1,162 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--nav-height) - 2rem);
+  padding-top: 1.5rem;
+}
+
+.header {
+  margin-bottom: 1.25rem;
+}
+
+.headerTop {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.title {
+  font-size: 1.5rem;
+}
+
+.version {
+  font-size: 0.75rem;
+  color: var(--color-text-faint);
+}
+
+.description {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  max-width: 720px;
+  margin-top: 0.35rem;
+}
+
+.status {
+  color: var(--color-text-muted);
+  padding: 2rem 0;
+}
+
+.error {
+  color: var(--color-error);
+  font-size: 0.88rem;
+  padding-top: 0.6rem;
+}
+
+.quickLog {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+
+.quickLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-faint);
+  margin-right: 0.25rem;
+}
+
+.quickButton {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+}
+
+.quickButton:hover {
+  color: var(--color-text);
+  border-color: var(--color-border-focus);
+}
+
+.quickActive {
+  color: #ffffff;
+  border-color: var(--color-accent);
+  background-color: rgba(42, 125, 110, 0.15);
+}
+
+.form {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.formRow {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.field {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.fieldNarrow {
+  flex: 0 1 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.fieldLabel {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.select {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  width: 100%;
+}
+
+.formActions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+
+.submitButton {
+  background-color: var(--color-accent);
+  color: #ffffff;
+  font-size: 0.88rem;
+  padding: 0.45rem 1.2rem;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+}
+
+.cancelButton {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  padding: 0.45rem 1.2rem;
+}
+
+.cancelButton:hover {
+  color: var(--color-text);
+}
+
+@media (max-width: 767px) {
+  .formRow {
+    flex-direction: column;
+  }
+
+  .field,
+  .fieldNarrow {
+    flex: 1 1 auto;
+  }
+}
