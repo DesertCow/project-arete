@@ -10,6 +10,7 @@ const demoUsers = [
       primarySport: 'running',
       secondarySports: ['hiking', 'yoga'],
       experience: 'intermediate',
+      location: { city: 'Portland, OR', lat: 45.5152, lon: -122.6784 },
     },
   },
   {
@@ -21,6 +22,7 @@ const demoUsers = [
       primarySport: 'climbing',
       secondarySports: ['trail_running', 'hiking', 'skiing'],
       experience: 'advanced',
+      location: { city: 'Boulder, CO', lat: 40.015, lon: -105.2705 },
     },
   },
   {
@@ -32,6 +34,7 @@ const demoUsers = [
       primarySport: 'triathlon',
       secondarySports: ['running', 'cycling', 'swimming'],
       experience: 'intermediate',
+      location: { city: 'Austin, TX', lat: 30.2672, lon: -97.7431 },
     },
   },
   {
@@ -43,6 +46,7 @@ const demoUsers = [
       primarySport: 'running',
       secondarySports: ['strength', 'cycling'],
       experience: 'advanced',
+      location: { city: 'Nashville, TN', lat: 36.1627, lon: -86.7816 },
     },
   },
 ];

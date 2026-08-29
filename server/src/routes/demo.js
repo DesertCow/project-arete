@@ -6,6 +6,7 @@ const { demoMessageSchema } = require('../schemas/demo');
 const { loadContextForPrompt } = require('../services/contextManager');
 const { buildCoachSystemPrompt } = require('../services/coachPrompt');
 const { getCoachResponse } = require('../services/ai');
+const { getWeatherForPrompt } = require('../services/weatherService');
 const { parseContextUpdate } = require('../services/coachService');
 
 const router = express.Router();
@@ -133,7 +134,15 @@ router.post(
       const { message, history } = req.validated;
 
       const context = await loadContextForPrompt(req.demoUser.id);
-      const systemPrompt = buildCoachSystemPrompt(context.formatted, 'conversation');
+
+      // Best-effort: a weather failure must not fail the demo turn.
+      const location = req.demoUser.sportProfile?.location;
+      const weatherText =
+        location?.lat && location?.lon
+          ? await getWeatherForPrompt(location.lat, location.lon, location.city)
+          : null;
+
+      const systemPrompt = buildCoachSystemPrompt(context.formatted, 'conversation', weatherText);
 
       const messages = [...history, { role: 'user', content: message }];
 
