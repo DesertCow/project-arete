@@ -1,10 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../utils/api.js';
 import { useAuth } from '../hooks/useAuth.js';
 import { readApiError } from '../utils/apiError.js';
 import styles from '../styles/Settings.module.css';
 
 const DEFAULT_TIMEZONE = 'America/New_York';
+
+const API_ORIGIN =
+  process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3001/api';
+
+const COROS_ERRORS = {
+  auth: 'Your session expired. Log in again, then retry connecting COROS.',
+  demo: 'Demo accounts cannot connect a COROS account.',
+  denied: 'COROS access was declined. Nothing was connected.',
+  expired: 'That connection attempt timed out. Please try again.',
+  exchange: 'COROS could not complete the connection. Please try again.',
+  default: 'Could not connect your COROS account. Please try again.',
+};
 
 // Common US zones cover the athletes we have; any other IANA name can be typed
 // in and the server validates it.
@@ -27,6 +40,12 @@ export default function Settings() {
   const [lat, setLat] = useState('');
   const [lon, setLon] = useState('');
   const [timezone, setTimezone] = useState(DEFAULT_TIMEZONE);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [coros, setCoros] = useState({ connected: false, corosOpenId: null });
+  const [corosBusy, setCorosBusy] = useState(false);
+  const [corosNotice, setCorosNotice] = useState(null);
+  const [corosError, setCorosError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState(null);
@@ -56,6 +75,60 @@ export default function Settings() {
       cancelled = true;
     };
   }, []);
+
+  const loadCorosStatus = useCallback(async () => {
+    try {
+      const res = await api.get('/coros/status');
+      setCoros(res.data);
+    } catch {
+      // Status is informational; a failure just leaves the card in its
+      // disconnected state rather than blocking the page.
+    }
+  }, []);
+
+  useEffect(() => {
+    loadCorosStatus();
+  }, [loadCorosStatus]);
+
+  // The OAuth callback returns here with ?coros=connected|error.
+  useEffect(() => {
+    const result = searchParams.get('coros');
+    if (!result) return;
+
+    if (result === 'connected') {
+      setCorosNotice('COROS account connected. Live training data is active.');
+      loadCorosStatus();
+    } else {
+      setCorosError(COROS_ERRORS[searchParams.get('reason')] || COROS_ERRORS.default);
+    }
+
+    // Clear the query string so a refresh does not replay the banner.
+    searchParams.delete('coros');
+    searchParams.delete('reason');
+    setSearchParams(searchParams, { replace: true });
+  }, [searchParams, setSearchParams, loadCorosStatus]);
+
+  const connectCoros = () => {
+    const token = localStorage.getItem('arete_token');
+    if (!token) return;
+    // Full navigation, not XHR: /connect answers with a 302 to COROS.
+    window.location.href = `${API_ORIGIN}/coros/connect?token=${encodeURIComponent(token)}`;
+  };
+
+  const disconnectCoros = async () => {
+    setCorosBusy(true);
+    setCorosError(null);
+    setCorosNotice(null);
+    try {
+      await api.post('/coros/disconnect');
+      setCoros({ connected: false, corosOpenId: null });
+      setCorosNotice('COROS account disconnected.');
+    } catch (err) {
+      setCorosError(readApiError(err, 'Could not disconnect your COROS account.'));
+    } finally {
+      setCorosBusy(false);
+    }
+  };
 
   const submit = async (event) => {
     event.preventDefault();
@@ -177,6 +250,49 @@ export default function Settings() {
           </form>
         </section>
       )}
+
+      <section className={styles.card}>
+        <header className={styles.cardHead}>
+          <h2 className={styles.cardTitle}>COROS Account</h2>
+          {coros.connected && (
+            <span className={styles.connected}>
+              <span className={styles.dot} aria-hidden="true" /> Connected
+            </span>
+          )}
+        </header>
+
+        {coros.connected ? (
+          <>
+            <p className={styles.cardHint}>
+              Your COROS account is connected. Live training data is active.
+            </p>
+            <button
+              type="button"
+              className={styles.dangerButton}
+              onClick={disconnectCoros}
+              disabled={corosBusy}
+            >
+              {corosBusy ? 'Disconnecting…' : 'Disconnect'}
+            </button>
+          </>
+        ) : (
+          <>
+            <p className={styles.cardHint}>
+              Connect your COROS account to enable live training data, recovery metrics, and
+              personalized coaching.
+            </p>
+            <button type="button" className={styles.saveButton} onClick={connectCoros}>
+              Connect COROS
+            </button>
+            <p className={styles.helper}>
+              Your COROS login happens on COROS&apos;s website. We never see your password.
+            </p>
+          </>
+        )}
+
+        {corosNotice && <p className={styles.success}>{corosNotice}</p>}
+        {corosError && <p className={styles.error}>{corosError}</p>}
+      </section>
     </div>
   );
 }

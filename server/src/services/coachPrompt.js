@@ -2,7 +2,8 @@ function buildCoachSystemPrompt(
   contextFormatted,
   mode = 'conversation',
   weatherText = null,
-  userDateTime = null
+  userDateTime = null,
+  liveCorosData = null
 ) {
   // Rendered in the athlete's own timezone, so "today" means their today.
   const dateTimeBlock = userDateTime
@@ -75,6 +76,18 @@ ${contextFormatted}
       'indoor/outdoor decisions. If the forecast shows extreme heat (>95°F), heavy rain, or ' +
       'dangerous conditions, proactively address it. Do not repeat the raw forecast back to ' +
       'the athlete — interpret it into actionable coaching.\n';
+  }
+
+  if (liveCorosData) {
+    prompt +=
+      `\n\n${liveCorosData}\n` +
+      "\nThis is real-time data from the athlete's COROS watch, current as of this moment. " +
+      'Use it to make specific, data-informed recommendations. Reference actual numbers ' +
+      '(their sleep score, HRV, recovery percentage, recent workout details) rather than ' +
+      'giving generic advice. If recovery is below 80% or HRV is below normal range, ' +
+      'proactively adjust your recommendations toward lighter training. Where live data and ' +
+      'the context files disagree, trust the live data for current state and the context ' +
+      'files for history and coaching notes.\n';
   }
 
   if (mode === 'checkin') {
