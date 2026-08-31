@@ -1,6 +1,54 @@
+const pino = require('pino');
+
 const hardcodedData = require('../data/hardcodedCorosData');
 const prisma = require('../lib/prisma');
 const { getAllContextFiles } = require('./contextManager');
+const { callMcpTools } = require('./corosMcp');
+const { parseCorosReport } = require('./corosTextParser');
+
+const logger = pino({ name: 'dashboardService' });
+
+// Live COROS payloads are cached per user so a page load does not re-run 11 MCP
+// calls. The fetch time rides along so the UI can show data age on a cache hit.
+const dashboardCache = new Map();
+const DASHBOARD_TTL_MS = 15 * 60 * 1000;
+
+function invalidateDashboard(userId) {
+  dashboardCache.delete(userId);
+}
+
+// yyyyMMdd, offset by whole days.
+function ymd(daysFromToday = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromToday);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+}
+
+// COROS MCP tools backing each dashboard section. querySportRecords and
+// queryTrainingSchedule take an explicit yyyyMMdd range — passing `days` there
+// silently falls back to the last 7 days.
+function dashboardToolCalls() {
+  return {
+    userInfo: { name: 'queryUserInfo' },
+    recoveryStatus: { name: 'queryRecoveryStatus' },
+    fitnessOverview: { name: 'queryFitnessAssessmentOverview' },
+    dailyHealth: { name: 'queryDailyHealthData', args: { days: 7 } },
+    restingHeartRate: { name: 'queryRestingHeartRate', args: { days: 7 } },
+    sleepData: { name: 'querySleepData', args: { days: 7 } },
+    sleepHrv: { name: 'querySleepHrv', args: { days: 7 } },
+    stressLevel: { name: 'queryStressLevel', args: { days: 7 } },
+    trainingLoad: { name: 'queryTrainingLoadAssessment', args: { days: 30 } },
+    sportRecords: {
+      name: 'querySportRecords',
+      args: { startDate: ymd(-30), endDate: ymd(0), limit: 20 },
+    },
+    trainingSchedule: {
+      name: 'queryTrainingSchedule',
+      args: { startDate: ymd(0), endDate: ymd(7) },
+    },
+  };
+}
 
 // MCP returns dates as "YYYYMMDD"; charts want a sortable ISO date.
 function normalizeDate(value) {
@@ -168,13 +216,43 @@ function formatSchedule(payload) {
   );
 }
 
-// Phase 6: check user.corosAccessToken and call MCP when connected.
-function getCorosData() {
-  return hardcodedData || {};
+// Live MCP data when the athlete has connected COROS; the hardcoded snapshot
+// otherwise (and always for demo accounts, which cannot connect).
+async function getCorosData(user, forceRefresh = false) {
+  if (!user?.corosAccessToken || user.role === 'DEMO') {
+    return { data: hardcodedData || {}, source: 'hardcoded', fetchedAt: null };
+  }
+
+  if (!forceRefresh) {
+    const cached = dashboardCache.get(user.id);
+    if (cached && Date.now() - cached.fetchedAt < DASHBOARD_TTL_MS) {
+      logger.info({ userId: user.id }, 'Dashboard COROS cache hit');
+      return { data: cached.data, source: 'coros', fetchedAt: cached.fetchedAt };
+    }
+  }
+
+  const calls = dashboardToolCalls();
+  const live = await callMcpTools(user, calls);
+  if (!live) {
+    logger.warn({ userId: user.id }, 'Live COROS fetch unavailable — using fallback data');
+    return { data: hardcodedData || {}, source: 'hardcoded', fetchedAt: null };
+  }
+
+  // COROS answers in prose; turn each report into the structured shape the
+  // formatters below already understand.
+  const parsed = {};
+  for (const [key, { name }] of Object.entries(calls)) {
+    parsed[key] = parseCorosReport(name, live[key]);
+  }
+
+  const fetchedAt = Date.now();
+  dashboardCache.set(user.id, { data: parsed, fetchedAt });
+  return { data: parsed, source: 'coros', fetchedAt };
 }
 
-async function getDashboardData(userId) {
-  const corosData = getCorosData(userId);
+async function getDashboardData(userId, forceRefresh = false) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const { data: corosData, source, fetchedAt } = await getCorosData(user, forceRefresh);
 
   const contextFiles = await getAllContextFiles(userId);
   const goalsFile = contextFiles.find((f) => f.fileType === 'GOALS');
@@ -198,7 +276,10 @@ async function getDashboardData(userId) {
     goals: goalsFile?.content || null,
     upcomingWorkouts: workouts,
     schedule: formatSchedule(corosData.trainingSchedule),
+    // null means the athlete has no live connection (sample data).
+    lastUpdated: fetchedAt ? new Date(fetchedAt).toISOString() : null,
+    dataSource: source,
   };
 }
 
-module.exports = { getDashboardData };
+module.exports = { getDashboardData, invalidateDashboard };

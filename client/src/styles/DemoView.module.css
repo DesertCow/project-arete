@@ -151,3 +151,9 @@
     flex: 1;
   }
 }
+
+.sampleNotice {
+  font-size: 0.8rem;
+  color: var(--color-text-faint);
+  margin-bottom: 0.75rem;
+}

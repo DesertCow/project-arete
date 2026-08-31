@@ -138,7 +138,12 @@ export default function DemoView() {
               <div className="skeleton skeleton-chart" />
             </div>
           )}
-          {dashboard && <DashboardView data={dashboard} />}
+          {dashboard && (
+            <>
+              <p className={styles.sampleNotice}>Sample data</p>
+              <DashboardView data={dashboard} />
+            </>
+          )}
         </div>
       ) : (
         <div className={styles.body}>

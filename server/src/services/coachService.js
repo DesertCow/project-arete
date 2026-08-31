@@ -6,6 +6,8 @@ const { getCoachResponse, streamCoachResponse } = require('./ai');
 const { buildCoachSystemPrompt } = require('./coachPrompt');
 const { getWeatherForPrompt } = require('./weatherService');
 const { getUserDateTime } = require('../utils/userTime');
+const { fetchCoachingDataCached } = require('./corosMcpClient');
+const { formatMcpDataForPrompt } = require('./corosDataFormatter');
 
 const logger = pino({ name: 'coachService' });
 
@@ -134,13 +136,33 @@ async function loadEnvironment(userId) {
     logger.warn({ err, userId }, 'Weather lookup failed — continuing without it');
   }
 
-  return { weatherText, userDateTime };
+  // Live watch data supplements the context files; it never blocks a reply.
+  let liveCorosData = null;
+  if (user?.corosAccessToken && user.role !== 'DEMO') {
+    try {
+      const mcpData = await fetchCoachingDataCached(userId);
+      liveCorosData = formatMcpDataForPrompt(mcpData);
+    } catch (err) {
+      logger.warn(
+        { userId, err: err.message },
+        'Failed to fetch live COROS data for coaching — continuing without it'
+      );
+    }
+  }
+
+  return { weatherText, userDateTime, liveCorosData, user };
 }
 
 async function handleCoachMessage(userId, message, mode = 'conversation') {
   const context = await loadContextForPrompt(userId);
-  const { weatherText, userDateTime } = await loadEnvironment(userId);
-  const systemPrompt = buildCoachSystemPrompt(context.formatted, mode, weatherText, userDateTime);
+  const { weatherText, userDateTime, liveCorosData } = await loadEnvironment(userId);
+  const systemPrompt = buildCoachSystemPrompt(
+    context.formatted,
+    mode,
+    weatherText,
+    userDateTime,
+    liveCorosData
+  );
   const messages = await buildMessages(userId, message);
 
   await saveChatMessage(userId, 'USER', message);
@@ -192,8 +214,14 @@ function createTagSafeEmitter(onChunk) {
 
 async function handleCoachMessageStream(userId, message, mode, onChunk) {
   const context = await loadContextForPrompt(userId);
-  const { weatherText, userDateTime } = await loadEnvironment(userId);
-  const systemPrompt = buildCoachSystemPrompt(context.formatted, mode, weatherText, userDateTime);
+  const { weatherText, userDateTime, liveCorosData } = await loadEnvironment(userId);
+  const systemPrompt = buildCoachSystemPrompt(
+    context.formatted,
+    mode,
+    weatherText,
+    userDateTime,
+    liveCorosData
+  );
   const messages = await buildMessages(userId, message);
 
   await saveChatMessage(userId, 'USER', message);

@@ -123,7 +123,18 @@ router.post('/logout', authenticate, async (req, res, next) => {
 
 router.get('/me', authenticate, (req, res) => {
   const { id, email, name, role, sportProfile, createdAt } = req.user;
-  return res.json({ user: { id, email, name, role, sportProfile, createdAt } });
+  return res.json({
+    user: {
+      id,
+      email,
+      name,
+      role,
+      sportProfile,
+      createdAt,
+      // Boolean only — the token itself never leaves the server.
+      corosConnected: !!req.user.corosAccessToken,
+    },
+  });
 });
 
 module.exports = router;
