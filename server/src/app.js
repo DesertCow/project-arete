@@ -11,6 +11,7 @@ const coachRouter = require('./routes/coach');
 const demoRouter = require('./routes/demo');
 const settingsRouter = require('./routes/settings');
 const corosRouter = require('./routes/coros');
+const historyRouter = require('./routes/history');
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.use('/api/context', contextRouter);
 app.use('/api/coach', coachRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/coros', corosRouter);
+app.use('/api/history', historyRouter);
 
 // In production the API server also serves the built client.
 if (process.env.NODE_ENV === 'production') {

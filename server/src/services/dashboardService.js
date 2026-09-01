@@ -1,6 +1,6 @@
 const pino = require('pino');
 
-const hardcodedData = require('../data/hardcodedCorosData');
+const { getDemoData } = require('../data/demoCorosData');
 const prisma = require('../lib/prisma');
 const { getAllContextFiles } = require('./contextManager');
 const { callMcpTools } = require('./corosMcp');
@@ -216,11 +216,12 @@ function formatSchedule(payload) {
   );
 }
 
-// Live MCP data when the athlete has connected COROS; the hardcoded snapshot
-// otherwise (and always for demo accounts, which cannot connect).
+// Live MCP data when the athlete has connected COROS; synthetic per-athlete
+// data otherwise. Demo accounts can never connect, so they always land here —
+// each one on their own dataset, keyed by email.
 async function getCorosData(user, forceRefresh = false) {
   if (!user?.corosAccessToken || user.role === 'DEMO') {
-    return { data: hardcodedData || {}, source: 'hardcoded', fetchedAt: null };
+    return { data: getDemoData(user?.email), source: 'hardcoded', fetchedAt: null };
   }
 
   if (!forceRefresh) {
@@ -235,7 +236,7 @@ async function getCorosData(user, forceRefresh = false) {
   const live = await callMcpTools(user, calls);
   if (!live) {
     logger.warn({ userId: user.id }, 'Live COROS fetch unavailable — using fallback data');
-    return { data: hardcodedData || {}, source: 'hardcoded', fetchedAt: null };
+    return { data: getDemoData(user.email), source: 'hardcoded', fetchedAt: null };
   }
 
   // COROS answers in prose; turn each report into the structured shape the

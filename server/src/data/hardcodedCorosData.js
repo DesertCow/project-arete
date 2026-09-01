@@ -1,6 +1,11 @@
 // Real data extracted from COROS MCP on 2026-08-28 (Clayton Skaggs / DesertCow).
-// Phase 6 replaces this with live MCP calls in dashboardService.js; the
-// dashboard API contract does not change.
+//
+// This is a captured reference sample, not a live code path: the dashboard
+// serves live MCP data to connected accounts and per-athlete synthetic data
+// (data/demoCorosData.js) to everyone else, so this athlete's numbers no longer
+// appear on any demo dashboard. It is kept as the worked example of the exact
+// shapes the MCP returns — the demo datasets and the text parsers are both
+// written against it.
 //
 // Shapes are kept exactly as the MCP returned them — snake_case keys, dates as
 // "YYYYMMDD" strings, and arrays nested under .days / .records / .assessment.
