@@ -4,14 +4,26 @@ const http = require('http');
 const pino = require('pino');
 const { WebSocketServer } = require('ws');
 
-const app = require('./app');
-const { setupCoachWebSocket } = require('./routes/wsCoach');
+const { validateEnv } = require('./utils/validateEnv');
 
+// Structured JSON in production so Railway can parse it; pretty locally.
 const logger = pino(
   process.env.NODE_ENV === 'production'
     ? { name: 'server' }
     : { name: 'server', transport: { target: 'pino-pretty' } }
 );
+
+// Fail fast and loudly rather than 500ing on the first request that needs a
+// missing secret. Runs before ./app so nothing else initialises first.
+try {
+  validateEnv({ logger });
+} catch (err) {
+  logger.error(err.message);
+  process.exit(1);
+}
+
+const app = require('./app');
+const { setupCoachWebSocket } = require('./routes/wsCoach');
 
 const PORT = process.env.PORT || 3001;
 

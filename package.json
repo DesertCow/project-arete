@@ -1,0 +1,15 @@
+{
+  "name": "project-arete",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI coaching platform for multi-sport athletes",
+  "scripts": {
+    "install:all": "cd server && npm install && npx prisma generate && cd ../client && npm install",
+    "build": "cd client && NODE_ENV=production npm run build",
+    "start": "cd server && npx prisma migrate deploy && node src/index.js",
+    "postinstall": "npm run install:all && npm run build"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

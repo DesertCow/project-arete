@@ -145,16 +145,16 @@ export default function DemoView() {
             </>
           )}
         </div>
+      ) : mobileTab === 'context' ? (
+        <div className={styles.contextFullPane}>
+          <DemoContextPanel contextFiles={data.contextFiles} />
+        </div>
       ) : (
         <div className={styles.body}>
-          <div
-            className={`${styles.chatPane} ${mobileTab === 'chat' ? styles.paneVisible : styles.paneHidden}`}
-          >
+          <div className={`${styles.chatPane} ${styles.paneVisible}`}>
             <DemoChat userId={data.user.id} />
           </div>
-          <div
-            className={`${styles.contextPane} ${mobileTab === 'context' ? styles.paneVisible : styles.paneHidden}`}
-          >
+          <div className={`${styles.contextPane} ${styles.paneHidden}`}>
             <DemoContextPanel contextFiles={data.contextFiles} />
           </div>
         </div>

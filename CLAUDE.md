@@ -10,7 +10,17 @@ plan; Phase 1 (scaffold) is complete, so most directories are still `.gitkeep` p
 
 ## Commands
 
-Everything is per-package — there is no root `package.json` and no workspace config.
+A root `package.json` exists for deployment only — Railway runs `npm install`
+(whose `postinstall` installs both packages, generates the Prisma client, and
+builds the client) and then `npm start` (`prisma migrate deploy` + the server).
+It declares no dependencies of its own; day-to-day work is still per-package.
+
+```bash
+# repo root — deployment entry points, not for daily development
+npm install          # installs server + client, generates Prisma client, builds client
+npm start            # prisma migrate deploy, then boots the server
+npm run build        # production client build only
+```
 
 ```bash
 # server (from server/)
@@ -37,8 +47,21 @@ Two independent packages, deployed as one Railway service that serves the API:
 - `server/` — Express API, CommonJS. `src/index.js` only loads dotenv, builds the pino logger, and
   calls `listen`; `src/app.js` builds and exports the app without listening, so it stays importable
   for tests. Currently only `GET /api/health` exists.
-- `client/` — React 18 SPA bundled by a hand-written `esbuild.config.js` (no dev server; the watch
-  build just rewrites `dist/`). `public/index.html` is copied to `dist/` on every build.
+- `client/` — React 18 SPA bundled by a hand-written `esbuild.config.js`. `npm run dev` runs
+  `dev-server.js`, which watches and serves `dist/` on port 3000 with an SPA fallback (esbuild's
+  own serve mode cannot rewrite unknown paths to `index.html`). `public/index.html` is copied to
+  `dist/` on every build.
+
+### Production runs as one process
+
+When `NODE_ENV=production`, `app.js` serves `client/dist` and falls back to `index.html` for any
+non-`/api/`, non-`/ws/` path, so the Express server hosts both the API and the SPA on one port.
+The 404 handler is scoped to `/api` precisely so it cannot swallow client-side routes. `npm run
+build` alone does **not** set `NODE_ENV`, so a local production bundle needs
+`NODE_ENV=production npm run build`.
+
+`src/utils/validateEnv.js` runs before anything else in `index.js` and exits 1 on a missing or
+placeholder-valued required secret, rather than failing later on the first request that needs it.
 
 ### Prisma lives outside the default location
 
