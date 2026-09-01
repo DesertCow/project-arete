@@ -21,12 +21,16 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.use(helmet());
-// Browsers send an Origin per host, so localhost and the LAN address are
-// distinct origins even though they reach the same dev server.
+// Browsers send an Origin per host, so localhost, the LAN address, and the
+// deployed domain are all distinct origins.
 const allowedOrigins = [
   process.env.CLIENT_URL || 'http://localhost:3000',
   'http://localhost:3000',
-];
+  // Railway injects the public domain; in production the client is served from
+  // this same origin, so its own requests carry it as Origin.
+  process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`,
+  process.env.RAILWAY_STATIC_URL,
+].filter(Boolean);
 
 app.use(
   cors({

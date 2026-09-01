@@ -157,3 +157,18 @@
   color: var(--color-text-faint);
   margin-bottom: 0.75rem;
 }
+
+/* Context tab: the panel is the whole view, so override the 380px sidebar
+   width it uses when it sits beside the chat. Targeting the <aside> keeps this
+   more specific than DemoContextPanel's own .panel rule. */
+.contextFullPane {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  padding-top: 1rem;
+}
+
+.contextFullPane > aside {
+  width: 100%;
+  flex: 1;
+}

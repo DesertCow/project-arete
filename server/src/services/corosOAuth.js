@@ -14,8 +14,11 @@ const COROS_AUTH = {
 };
 
 // Obtained via dynamic registration and held in memory. A restart simply
-// re-registers on the next connect attempt.
+// re-registers on the next connect attempt. The redirect_uri is part of the
+// registration, so the cache is keyed by it — moving from localhost to the
+// production domain must not reuse a client registered for the old URL.
 let cachedClientId = null;
+let cachedForCallbackUrl = null;
 
 function generatePKCE() {
   const verifier = crypto.randomBytes(32).toString('base64url');
@@ -72,7 +75,7 @@ function postJson(url, body, headers = {}) {
 }
 
 async function registerClient(callbackUrl) {
-  if (cachedClientId) {
+  if (cachedClientId && cachedForCallbackUrl === callbackUrl) {
     return cachedClientId;
   }
 
@@ -91,8 +94,9 @@ async function registerClient(callbackUrl) {
   }
 
   cachedClientId = result.body.client_id;
+  cachedForCallbackUrl = callbackUrl;
   logger.info(
-    { clientId: cachedClientId },
+    { clientId: cachedClientId, callbackUrl },
     'COROS client registered dynamically — cached in memory, re-registers on restart'
   );
 
@@ -185,9 +189,15 @@ function getClientId() {
   return cachedClientId;
 }
 
+function resetClientId() {
+  cachedClientId = null;
+  cachedForCallbackUrl = null;
+}
+
 // Test seam: lets the suite exercise the flow without hitting COROS.
-function _setClientIdForTest(id) {
+function _setClientIdForTest(id, callbackUrl = null) {
   cachedClientId = id;
+  cachedForCallbackUrl = callbackUrl;
 }
 
 module.exports = {
@@ -199,6 +209,7 @@ module.exports = {
   generatePKCE,
   generateState,
   getClientId,
+  resetClientId,
   _setClientIdForTest,
   COROS_AUTH,
 };
