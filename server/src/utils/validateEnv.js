@@ -14,7 +14,13 @@ const OPTIONAL = [
   { key: 'PORT', fallback: '3001' },
   { key: 'NODE_ENV', fallback: 'development' },
   { key: 'AI_PROVIDER', fallback: 'claude' },
-  { key: 'ANTHROPIC_MODEL', fallback: 'claude-sonnet-4-6' },
+  {
+    key: 'ANTHROPIC_MODEL',
+    // Must match the fallback in services/ai.js. That fallback is a retired
+    // model id that now 404s, so an unset value breaks every coach call.
+    fallback: 'claude-sonnet-4-20250514',
+    productionWarning: 'that fallback model is retired and returns 404 — set this explicitly',
+  },
   { key: 'ALLOWED_EMAIL_DOMAIN', fallback: 'coros.com' },
   {
     key: 'CLIENT_URL',
